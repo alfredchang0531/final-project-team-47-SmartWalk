@@ -12,6 +12,8 @@ from walksmart import (
 )
 
 app = Flask(__name__)
+MIN_WALKING_MINUTES = 1
+MAX_WALKING_MINUTES = 120
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -21,6 +23,8 @@ def index():
         "categories": categories,
         "selected_category": categories[0],
         "max_minutes": 15,
+        "min_walking_minutes": MIN_WALKING_MINUTES,
+        "max_walking_minutes": MAX_WALKING_MINUTES,
         "start_query": "",
         "results": [],
         "map_html": None,
@@ -41,12 +45,13 @@ def index():
                     "start_query": start_query,
                     "error": (
                         "Invalid walking time value. "
-                        "Please enter a number between 1 and 120 minutes."
+                        f"Please enter a number between {MIN_WALKING_MINUTES} "
+                        f"and {MAX_WALKING_MINUTES} minutes."
                     ),
                 }
             )
             return render_template("index.html", **context)
-        max_minutes = max(1, min(max_minutes, 120))
+        max_minutes = max(MIN_WALKING_MINUTES, min(max_minutes, MAX_WALKING_MINUTES))
 
         context.update(
             {

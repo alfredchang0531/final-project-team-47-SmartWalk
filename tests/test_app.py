@@ -21,10 +21,20 @@ def test_index_post_invalid_location(monkeypatch):
 
 
 def test_index_post_success(monkeypatch):
+    expected_start = {"name": "Start", "lat": 25.0, "lon": 121.0}
+    expected_ranked = [
+        {
+            "name": "Cafe A",
+            "duration_min": 7.0,
+            "distance_km": 0.6,
+            "explanation": "Rank #1: sample",
+        }
+    ]
+
     monkeypatch.setattr(
         walksmart_app,
         "geocode_start_location",
-        lambda query: {"name": "Start", "lat": 25.0, "lon": 121.0},
+        lambda query: expected_start,
     )
     monkeypatch.setattr(
         walksmart_app,
@@ -34,14 +44,7 @@ def test_index_post_success(monkeypatch):
     monkeypatch.setattr(
         walksmart_app,
         "rank_places_with_walk_time",
-        lambda *args, **kwargs: [
-            {
-                "name": "Cafe A",
-                "duration_min": 7.0,
-                "distance_km": 0.6,
-                "explanation": "Rank #1: sample",
-            }
-        ],
+        lambda *args, **kwargs: expected_ranked,
     )
     monkeypatch.setattr(
         walksmart_app,
@@ -52,7 +55,13 @@ def test_index_post_success(monkeypatch):
             "summary": "1 reachable place(s), average walk 7.0 minutes.",
         },
     )
-    monkeypatch.setattr(walksmart_app, "build_map", lambda start, results: "<div>fake-map</div>")
+    calls = []
+
+    def fake_build_map(start, results):
+        calls.append((start, results))
+        return "<div>fake-map</div>"
+
+    monkeypatch.setattr(walksmart_app, "build_map", fake_build_map)
 
     client = walksmart_app.app.test_client()
     response = client.post(
@@ -63,6 +72,7 @@ def test_index_post_success(monkeypatch):
     assert b"WalkSmart Convenience Score: 70/100" in response.data
     assert b"Cafe A" in response.data
     assert b"fake-map" in response.data
+    assert calls == [(expected_start, expected_ranked)]
 
 
 def test_index_post_invalid_max_minutes():

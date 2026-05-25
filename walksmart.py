@@ -42,6 +42,8 @@ def geocode_start_location(query: str) -> dict | None:
     if not places:
         return None
     first = places[0]
+    if "lat" not in first or "lon" not in first:
+        return None
     return {
         "name": first.get("display_name", query),
         "lat": float(first["lat"]),

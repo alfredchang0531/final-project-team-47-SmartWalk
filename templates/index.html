@@ -51,7 +51,7 @@
             </div>
             <div>
               <label for="max_minutes">Max walking minutes</label>
-              <input id="max_minutes" type="number" min="1" max="120" name="max_minutes" value="{{ max_minutes }}" required />
+              <input id="max_minutes" type="number" min="{{ min_walking_minutes }}" max="{{ max_walking_minutes }}" name="max_minutes" value="{{ max_minutes }}" required />
             </div>
             <div>
               <button type="submit">Search</button>
