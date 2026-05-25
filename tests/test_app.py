@@ -63,3 +63,13 @@ def test_index_post_success(monkeypatch):
     assert b"WalkSmart Convenience Score: 70/100" in response.data
     assert b"Cafe A" in response.data
     assert b"fake-map" in response.data
+
+
+def test_index_post_invalid_max_minutes():
+    client = walksmart_app.app.test_client()
+    response = client.post(
+        "/",
+        data={"start_location": "Taipei Main Station", "category": "cafe", "max_minutes": "abc"},
+    )
+    assert response.status_code == 200
+    assert b"Invalid walking time value" in response.data

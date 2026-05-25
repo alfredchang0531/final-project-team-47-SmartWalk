@@ -31,7 +31,21 @@ def index():
     if request.method == "POST":
         start_query = request.form.get("start_location", "").strip()
         selected_category = request.form.get("category", categories[0])
-        max_minutes = int(request.form.get("max_minutes", 15))
+        try:
+            max_minutes = int(request.form.get("max_minutes", 15))
+        except (TypeError, ValueError):
+            context.update(
+                {
+                    "selected_category": selected_category,
+                    "max_minutes": 15,
+                    "start_query": start_query,
+                    "error": (
+                        "Invalid walking time value. "
+                        "Please enter a number between 1 and 120 minutes."
+                    ),
+                }
+            )
+            return render_template("index.html", **context)
         max_minutes = max(1, min(max_minutes, 120))
 
         context.update(

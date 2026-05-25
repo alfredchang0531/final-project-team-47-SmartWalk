@@ -8,6 +8,7 @@ import requests
 NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search"
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/foot"
 REQUEST_HEADERS = {"User-Agent": "WalkSmart/1.0"}
+NOMINATIM_RESPONSE_FORMAT = "jsonv2"
 SEARCH_VIEWBOX_DELTA_DEGREES = 0.03
 MAX_SPEED_SCORE = 35
 CLOSE_PROXIMITY_BONUS = 15
@@ -29,7 +30,7 @@ def geocode_start_location(query: str) -> dict | None:
     try:
         response = requests.get(
             NOMINATIM_SEARCH_URL,
-            params={"q": query, "format": "jsonv2", "limit": 1},
+            params={"q": query, "format": NOMINATIM_RESPONSE_FORMAT, "limit": 1},
             headers=REQUEST_HEADERS,
             timeout=10,
         )
@@ -60,7 +61,7 @@ def search_candidate_places(start_lat: float, start_lon: float, category: str) -
             params={
                 "q": amenity,
                 "amenity": amenity,
-                "format": "jsonv2",
+                "format": NOMINATIM_RESPONSE_FORMAT,
                 "limit": 25,
                 "bounded": 1,
                 "viewbox": viewbox,
