@@ -1,5 +1,6 @@
 import os
 import time
+import math
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
@@ -86,7 +87,7 @@ def geocode_location(query: str) -> Optional[Dict[str, Any]]:
 
 def _build_viewbox(lat: float, lon: float, radius_meters: int = 3500) -> str:
     lat_delta = radius_meters / 111_000
-    lon_delta = radius_meters / (111_000 * max(0.3, abs(__import__("math").cos(__import__("math").radians(lat)))))
+    lon_delta = radius_meters / (111_000 * max(0.3, abs(math.cos(math.radians(lat)))))
     left = lon - lon_delta
     right = lon + lon_delta
     top = lat + lat_delta

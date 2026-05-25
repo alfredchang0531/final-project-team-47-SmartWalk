@@ -1,5 +1,5 @@
 from statistics import mean
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 
 def _norm(value: float, max_value: float) -> float:
@@ -9,7 +9,7 @@ def _norm(value: float, max_value: float) -> float:
 
 
 def rank_places(places: List[Dict[str, Any]], lunch_mode: bool = False, selected_category: str = "") -> List[Dict[str, Any]]:
-    def sort_key(place: Dict[str, Any]) -> tuple[float, float]:
+    def sort_key(place: Dict[str, Any]) -> Tuple[float, float]:
         duration = float(place.get("duration_sec", 9_999_999))
         if lunch_mode and selected_category in {"restaurant", "cafe"}:
             comfort_target = 8 * 60
