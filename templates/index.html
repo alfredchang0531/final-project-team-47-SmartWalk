@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WalkSmart</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>WalkSmart</h1>
+    <p class="subtitle">Find places you can actually walk to.</p>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form action="{{ url_for('search') }}" method="post" class="search-form">
+        <label for="location">Starting location</label>
+        <input id="location" name="location" type="text" required placeholder="e.g., Times Square, New York">
+
+        <label for="category">Category</label>
+        <select id="category" name="category" required>
+            <option value="">Choose category</option>
+            {% for key, label in categories.items() %}
+                <option value="{{ key }}" {% if selected_category == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="max_time">Max walking time (minutes)</label>
+        <select id="max_time" name="max_time" required>
+            {% for t in walk_times %}
+                <option value="{{ t }}" {% if selected_time == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+        </select>
+
+        <label class="checkbox">
+            <input type="checkbox" name="lunch_mode"> Lunch Mode (prioritize short cafe/restaurant walks)
+        </label>
+
+        <button type="submit">Search Walkable Places</button>
+    </form>
+</div>
+</body>
+</html>
