@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WalkSmart Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container result-page">
+    <a href="{{ url_for('index') }}" class="back-link">← New Search</a>
+    <h1>WalkSmart Results</h1>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <section class="summary-card">
+        <h2>Summary</h2>
+        <ul>
+            <li><strong>Origin:</strong> {{ summary.origin }}</li>
+            <li><strong>Category:</strong> {{ summary.category }}</li>
+            <li><strong>Max walking time:</strong> {{ summary.max_time }} minutes</li>
+            <li><strong>Reachable places:</strong> {{ summary.reachable_count or 0 }}</li>
+            {% if summary.lunch_mode %}<li><strong>Lunch Mode:</strong> On</li>{% endif %}
+        </ul>
+    </section>
+
+    <section class="score-card">
+        <h2>WalkSmart Convenience Score: {{ score.score }}/100</h2>
+        <p>{{ score.explanation }}</p>
+    </section>
+
+    <section class="result-list">
+        <h2>Ranked Reachable Places</h2>
+        {% if places %}
+            {% for place in places %}
+                <article class="place-card">
+                    <h3>{{ loop.index }}. {{ place.name }}</h3>
+                    <p>{{ (place.duration_sec / 60)|round|int }} min walk • {{ '%.2f'|format(place.distance_m / 1000) }} km</p>
+                    <p>{{ place.explanation }}</p>
+                    <small>{{ place.display_name }}</small>
+                </article>
+            {% endfor %}
+        {% else %}
+            <p>No reachable places found for this search.</p>
+        {% endif %}
+    </section>
+
+    {% if map_html %}
+    <section class="map-card">
+        <h2>Map</h2>
+        <div class="map-container">{{ map_html|safe }}</div>
+    </section>
+    {% endif %}
+</div>
+</body>
+</html>
