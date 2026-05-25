@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WalkSmart</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1b1f24; }
+      .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+      .card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 16px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
+      input, select, button { width: 100%; padding: 8px; font-size: 14px; }
+      button { background: #0b5fff; color: white; border: none; border-radius: 6px; cursor: pointer; }
+      button:hover { background: #084ed6; }
+      .error { color: #b42318; margin-top: 10px; }
+      .results { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+      ol { margin: 0; padding-left: 20px; }
+      li { margin-bottom: 12px; }
+      .score-badge { display: inline-block; background: #eaf2ff; color: #123d8b; border-radius: 999px; padding: 6px 12px; font-weight: bold; }
+      .map-wrap { min-height: 500px; }
+      @media (max-width: 960px) {
+        .row, .results { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>WalkSmart</h1>
+      <p>Find places you can realistically walk to, with route-based travel times.</p>
+
+      <div class="card">
+        <form method="post">
+          <div class="row">
+            <div>
+              <label for="start_location">Starting location</label>
+              <input
+                id="start_location"
+                name="start_location"
+                placeholder="e.g., Taipei Main Station or 1600 Amphitheatre Parkway"
+                value="{{ start_query }}"
+                required
+              />
+            </div>
+            <div>
+              <label for="category">Category</label>
+              <select id="category" name="category">
+                {% for category in categories %}
+                <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category.title() }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label for="max_minutes">Max walking minutes</label>
+              <input id="max_minutes" type="number" min="1" max="120" name="max_minutes" value="{{ max_minutes }}" required />
+            </div>
+            <div>
+              <button type="submit">Search</button>
+            </div>
+          </div>
+        </form>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+      </div>
+
+      {% if score %}
+      <div class="card">
+        <span class="score-badge">WalkSmart Convenience Score: {{ score.score }}/100</span>
+        <p><strong>{{ score.label }}</strong></p>
+        <p>{{ score.summary }}</p>
+      </div>
+      {% endif %}
+
+      {% if map_html %}
+      <div class="results">
+        <div class="card">
+          <h2>Ranked results</h2>
+          {% if results %}
+          <ol>
+            {% for place in results %}
+            <li>
+              <strong>{{ place.name }}</strong><br />
+              {{ place.duration_min|round(1) }} min · {{ place.distance_km|round(2) }} km<br />
+              <small>{{ place.explanation }}</small>
+            </li>
+            {% endfor %}
+          </ol>
+          {% else %}
+          <p>No reachable places found for this search.</p>
+          {% endif %}
+        </div>
+        <div class="card map-wrap">{{ map_html|safe }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </body>
+</html>
