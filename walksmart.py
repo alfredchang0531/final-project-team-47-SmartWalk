@@ -8,6 +8,11 @@ import requests
 NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search"
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/foot"
 REQUEST_HEADERS = {"User-Agent": "WalkSmart/1.0"}
+SEARCH_VIEWBOX_DELTA_DEGREES = 0.03
+MAX_SPEED_SCORE = 35
+CLOSE_PROXIMITY_BONUS = 15
+CLOSE_PROXIMITY_THRESHOLD_MIN = 8
+MAX_ROUTES_TO_DISPLAY = 3
 
 CATEGORY_TO_AMENITY = {
     "cafe": "cafe",
@@ -45,7 +50,7 @@ def geocode_start_location(query: str) -> dict | None:
 
 def search_candidate_places(start_lat: float, start_lon: float, category: str) -> list[dict]:
     amenity = CATEGORY_TO_AMENITY.get(category, category)
-    delta = 0.03
+    delta = SEARCH_VIEWBOX_DELTA_DEGREES
     viewbox = (
         f"{start_lon - delta},{start_lat + delta},{start_lon + delta},{start_lat - delta}"
     )
@@ -156,8 +161,14 @@ def compute_convenience_score(results: list[dict], max_minutes: int) -> dict:
 
     avg_minutes = mean(place["duration_min"] for place in results)
     count_score = min(50, len(results) * 10)
-    speed_score = max(0, int(35 - (avg_minutes / max(max_minutes, 1)) * 35))
-    close_bonus = 15 if any(place["duration_min"] <= 8 for place in results) else 0
+    speed_score = max(
+        0, int(MAX_SPEED_SCORE - (avg_minutes / max(max_minutes, 1)) * MAX_SPEED_SCORE)
+    )
+    close_bonus = (
+        CLOSE_PROXIMITY_BONUS
+        if any(place["duration_min"] <= CLOSE_PROXIMITY_THRESHOLD_MIN for place in results)
+        else 0
+    )
     score = min(100, count_score + speed_score + close_bonus)
 
     if score >= 80:
@@ -198,7 +209,7 @@ def build_map(start: dict, results: list[dict]) -> str:
             icon=folium.Icon(color="green", icon="ok-sign"),
         ).add_to(base_map)
 
-        if idx <= 3 and place.get("geometry", {}).get("coordinates"):
+        if idx <= MAX_ROUTES_TO_DISPLAY and place.get("geometry", {}).get("coordinates"):
             points = [[lat, lon] for lon, lat in place["geometry"]["coordinates"]]
             folium.PolyLine(points, color="red", weight=4, opacity=0.7).add_to(base_map)
 
